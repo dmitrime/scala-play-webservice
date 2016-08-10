@@ -6,6 +6,7 @@ There are 4 possible actions:
 
 * PUT /transactionservice/transaction/:transactionId  
   Stores a transaction by ID and JSON body.
+  Constant time operation O(1) (assuming inserting into the map and appending to the list are constant time operations).
 
   Example: 
 
@@ -13,9 +14,12 @@ There are 4 possible actions:
 
 * GET /transactionservice/transaction/:transactionId
   Retrieves a transaction by ID.
+  Constant time operation O(1) (assuming lookup in the Map is a constant time operation).
 
 * GET /transactionservice/types/:typeName
   Lists all transactions of the same type.
+  Constant time operation O(1) (assuming lookup in the Map is a constant time operation).
 
 * GET /transactionservice/sum/:transactionId 
   Sums up transactions of the same parent transaction.
+  Linear time operation O(N), where N is the number of transactions.
