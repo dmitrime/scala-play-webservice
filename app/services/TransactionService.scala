@@ -8,7 +8,7 @@ import models.Transaction
  * Represents a transaction that can be stored, read, summed and grouped  * by type.
  */
 trait TransactionService {
-  //def store(transactionId: Long)
+  def store(transaction: Transaction)
   def retrieve(transactionId: Long): Option[Transaction]
   def listType(typeName: String): List[Long]
   //def sum(parentId: Long): Double
@@ -34,6 +34,9 @@ class TransactionServiceImpl extends TransactionService {
   val transactionTypes = scala.collection.mutable.Map(
     "A-type" -> List(1L),
     "B-type" -> List(2L, 3L))
+
+  override def store(transaction: Transaction) =
+    System.out.println("tx: " + transaction.id + transaction.typeName)
 
   override def retrieve(transactionId: Long): Option[Transaction] = 
     if (transactions.contains(transactionId)) Some(transactions(transactionId)) else None
