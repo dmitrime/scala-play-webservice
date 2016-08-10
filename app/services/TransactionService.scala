@@ -1,6 +1,7 @@
 package services
 
 import javax.inject._
+import scala.collection._
 
 import models.Transaction
 
@@ -11,7 +12,7 @@ trait TransactionService {
   def store(transaction: Transaction)
   def retrieve(transactionId: Long): Option[Transaction]
   def listType(typeName: String): List[Long]
-  //def sum(parentId: Long): Double
+  def sum(transactionId: Long): Option[Double]
 }
 
 /**
@@ -26,22 +27,51 @@ trait TransactionService {
  */
 @Singleton
 class TransactionServiceImpl extends TransactionService {  
-  val transactions = scala.collection.mutable.Map(
-    1L -> Transaction(1, "A-type", 4.2, Some(10L)), 
-    2L -> Transaction(2, "B-type", 1.2, Some(20L)),
-    3L -> Transaction(3, "B-type", 3.2, None))
+  private val transactions : concurrent.Map[Long, Transaction] = concurrent.TrieMap()
+  private val transactionTypes : concurrent.Map[String, mutable.ListBuffer[Long]] = concurrent.TrieMap()
+  private val childTransactions : concurrent.Map[Long, mutable.ListBuffer[Long]] = concurrent.TrieMap()
 
-  val transactionTypes = scala.collection.mutable.Map(
-    "A-type" -> List(1L),
-    "B-type" -> List(2L, 3L))
+  /*
+   * Do a depth-first search starting from id and visit all its decendents.
+   */
+  private def searchAndSum(id: Long) : Double = {
+    childTransactions.getOrElse(id, List()).toList match {
+      case xs  => transactions(id).amount + xs.map(searchAndSum).sum
+      case Nil => transactions(id).amount
+    }
+  }
 
-  override def store(transaction: Transaction) =
-    System.out.println("tx: " + transaction.id + transaction.typeName)
+  /*
+   * Store a new transaction by adding it to the transaction map,
+   * its ID to the transaction type map under its type key,
+   * and to child map under its parent ID key.
+   */
+  override def store(transaction: Transaction) = {
+    transactions += (transaction.id -> transaction)
+    transactionTypes.getOrElseUpdate(transaction.typeName, 
+                                     mutable.ListBuffer()) += transaction.id
+    transaction.parentId match {
+      case Some(parent) => childTransactions.getOrElseUpdate(
+                               parent, mutable.ListBuffer()) += transaction.id
+      case None => Unit
+    }
+  }
 
+  /*
+   * Lookup and return the transaction by ID, if it exists.
+   */
   override def retrieve(transactionId: Long): Option[Transaction] = 
-    if (transactions.contains(transactionId)) Some(transactions(transactionId)) else None
+    transactions.get(transactionId)
 
+  /*
+   * List all transaction IDs having the same typeName.
+   */
   override def listType(typeName: String): List[Long] = 
-    if (transactionTypes.contains(typeName)) transactionTypes(typeName) else List()
+    transactionTypes.getOrElse(typeName, List()).toList
 
+  /*
+   * Sum up the amounts of the transaction and all its children, recursively.
+   */
+  override def sum(transactionId: Long): Option[Double] = 
+    if (transactions.contains(transactionId)) Some(searchAndSum(transactionId)) else None
 }

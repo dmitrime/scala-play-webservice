@@ -23,3 +23,22 @@ object Transaction {
     (JsPath \ "parent_id").readNullable[Long]
   )(Transaction.apply _)
 }
+
+/*
+object Transaction {
+    implicit object TransactionFormat extends Format[Transaction] {
+            def reads(json: JsValue) = JsSuccess(Transaction(
+                (json \ "amount").as[Double],
+                (json \ "type").as[String],
+                (json \ "parent_id").as[Long]
+            ))
+
+            def writes(tx: Transaction): JsValue = JsObject(Seq(
+                "id" -> JsNumber(tx.id),
+                "type" -> JsString(tx.typeName),
+                "amount" -> JsNumber(tx.amount),
+                "parent_id" -> JsNumber(tx.parentId)
+            ))
+    }
+}
+*/

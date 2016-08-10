@@ -24,23 +24,25 @@ class TransactionController @Inject() (transactionService: TransactionService) e
     Ok(Json.obj("status" -> "ok")) 
   }
   
-
   /**
    * Action that retrieves a transaction by id.
    */
   def retrieve(transactionId: Long) = Action {
-    System.out.println(transactionService.retrieve(transactionId))
     Ok(Json.toJson(transactionService.retrieve(transactionId)))
   }
 
   /**
-   * Action that retrieves a transaction by id.
+   * Action that returns a list of all IDs of the given type.
    */
-  def listType(typeName: String) = Action { Ok(Json.toJson(transactionService.listType(typeName))) }
+  def listType(typeName: String) = Action {
+    Ok(Json.toJson(transactionService.listType(typeName))) 
+  }
 
   /**
-   * Action that retrieves a transaction by id.
+   * Action that sums up the amounts of the transaction together with its children, transitively.
    */
-  def sum(transactionId: Long) = Action { Ok(Json.toJson(4.2)) }
+  def sum(transactionId: Long) = Action {
+    Ok(Json.toJson(transactionService.sum(transactionId)))
+  }
 
 }
