@@ -1,49 +1,21 @@
-This is your new Play application
+Scala + Play REST WebService
 =================================
 
-This file will be packaged with your application when using `activator dist`.
+There are 4 possible actions:
 
-There are several demonstration files available in this template.
 
-Controllers
-===========
+* PUT /transactionservice/transaction/:transactionId  
+  Stores a transaction by ID and JSON body.
 
-- HomeController.scala:
+  Example: 
 
-  Shows how to handle simple HTTP requests.
+    curl -X PUT -H "Content-Type: application/json" http://127.0.0.1:9000/transactionservice/transaction/12--data '{"amount":4,"type":"type1","parent_id":10}'
 
-- AsyncController.scala:
+* GET /transactionservice/transaction/:transactionId
+  Retrieves a transaction by ID.
 
-  Shows how to do asynchronous programming when handling a request.
+* GET /transactionservice/types/:typeName
+  Lists all transactions of the same type.
 
-- CountController.scala:
-
-  Shows how to inject a component into a controller and use the component when
-  handling requests.
-
-Components
-==========
-
-- Module.scala:
-
-  Shows how to use Guice to bind all the components needed by your application.
-
-- Counter.scala:
-
-  An example of a component that contains state, in this case a simple counter.
-
-- ApplicationTimer.scala:
-
-  An example of a component that starts when the application starts and stops
-  when the application stops.
-
-Filters
-=======
-
-- Filters.scala:
-
-  Creates the list of HTTP filters used by your application.
-
-- ExampleFilter.scala
-
-  A simple filter that adds a header to every response.
+* GET /transactionservice/sum/:transactionId 
+  Sums up transactions of the same parent transaction.
