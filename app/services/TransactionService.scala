@@ -35,10 +35,15 @@ class TransactionServiceImpl extends TransactionService {
    * Do a depth-first search starting from id and visit all its decendents.
    */
   private def searchAndSum(id: Long) : Double = {
-    childTransactions.getOrElse(id, List()).toList match {
-      case xs  => transactions(id).amount + xs.map(searchAndSum).sum
-      case Nil => transactions(id).amount
+    val visited = mutable.SortedSet[Long]()
+    def _search(id: Long) : Double = {
+      visited += id
+      childTransactions.getOrElse(id, List()).toList match {
+        case Nil => transactions(id).amount
+        case xs  => transactions(id).amount + xs.filter(_id => !visited(_id)).map(_search).sum
+      }
     }
+    _search(id)
   }
 
   /*

@@ -32,7 +32,6 @@ class TransactionSpec extends PlaySpec with OneAppPerTest {
     "correctly sum up transaction amounts" in  {
       val service : TransactionService = new TransactionServiceImpl()
       service.store(Transaction(1L, "type1", 1.0, None))
-      System.out.println(service.sum(1L))
       service.sum(1L) must equal (Some(1.0))
 
       service.store(Transaction(2L, "type2", 2.0, Some(1L)))
@@ -45,6 +44,16 @@ class TransactionSpec extends PlaySpec with OneAppPerTest {
       service.sum(3L) must equal (Some(3.0))
 
       service.sum(4L) must be (None)
+    }
+    "correctly sum up transaction amounts with circular dependencies" in  {
+      val service : TransactionService = new TransactionServiceImpl()
+      service.store(Transaction(1L, "type1", 1.0, Some(3L)))
+      service.store(Transaction(2L, "type2", 2.0, Some(1L)))
+      service.store(Transaction(3L, "type3", 3.0, Some(2L)))
+
+      service.sum(1L) must equal (Some(6.0))
+      service.sum(2L) must equal (Some(6.0))
+      service.sum(3L) must equal (Some(6.0))
     }
   }
 }
